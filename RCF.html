@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RCF – Responsabilidade-Chave da Função (Farmácia) | Desenvolva</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#F15A24; --ink:#111; --bg:#f7f7f8; --surface:#fff; --muted:#666; --line:#e7e7e7;
+  --shadow:0 8px 24px rgba(0,0,0,.06); --radius:14px; --font:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);padding:26px;line-height:1.6;font-size:18px}
+.container{max-width:1100px;margin:0 auto}
+.header{display:flex;gap:16px;align-items:center;background:#000;color:#fff;padding:18px 22px;border-radius:16px;margin-bottom:18px}
+.header .logo{height:54px;width:auto}
+.header h1{color:var(--brand);font-weight:800;font-size:26px;margin:0}
+.header p{opacity:.9}
+
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:14px 0 20px}
+.btn{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;transition:.2s;display:inline-flex;gap:8px;align-items:center}
+.btn:hover{transform:translateY(-1px);filter:brightness(.95)}
+.btn--sec{background:#111}.btn--sec:hover{filter:brightness(1.15)}
+.btn--ghost{background:#fff;color:#111;border:1px solid var(--line)}
+.select{padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:600}
+
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;margin-bottom:20px}
+.section-title{background:var(--brand);color:#fff;border-radius:10px;padding:10px 14px;font-weight:800;margin-bottom:14px;display:flex;gap:8px;align-items:center}
+
+.grid-4{display:grid;grid-template-columns:1.4fr 1fr 1.2fr .9fr;gap:12px}
+.field label{display:block;color:#777;font-size:14px;margin-bottom:6px}
+.field input{width:100%;border:none;border-bottom:2px solid var(--brand);background:transparent;padding:6px 0;font-size:18px}
+
+.area{background:#fafafa;border:2px dashed #dcdcdc;border-radius:12px;padding:16px}
+.area label{display:block;font-weight:700;color:#444;margin-bottom:8px}
+.lined{width:100%;min-height:140px;border:none;background:linear-gradient(transparent 28px,#d9d9d9 29px) repeat-y;background-size:100% 32px;padding:8px 4px 8px 0;line-height:32px;font-size:18px;outline:none}
+.lined::placeholder{color:#aaa}
+
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#000;color:#fff;text-align:left;font-weight:800}
+td input,td textarea{width:100%;border:none;background:transparent;font-size:18px;line-height:1.6}
+td textarea{min-height:64px}
+tr:nth-child(even) td{background:#fcfcfc}
+.table-actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+
+.note{font-size:14px;color:#777;margin-top:6px}
+.footer{text-align:center;color:#666;border-top:2px solid var(--brand);padding-top:12px;margin-top:22px;font-size:15px}
+
+/* PRINT */
+@page{size:A4;margin:14mm}
+@media print{
+  body{background:#fff;padding:0}
+  .toolbar,.model-tools{display:none!important}
+  .card{box-shadow:none;border:0}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Cabeçalho -->
+  <div class="header">
+    <!-- LOGO PRETA (data URI embutida) -->
+    <img class="logo" alt="Desenvolva" src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 120'><text x='0' y='84' font-family='Inter, Arial, sans-serif' font-size='84' font-weight='900' fill='%23FFFFFF'>DESENVOLVA</text></svg>">
+    <div>
+      <h1>RCF — Responsabilidade-Chave da Função</h1>
+      <p>Formato Desenvolva • Preencha, aplique o modelo e imprima</p>
+    </div>
+  </div>
+
+  <!-- Barra de modelos + botões -->
+  <div class="toolbar model-tools">
+    <select id="modelo" class="select" title="Modelos de cargo">
+      <option value="">Escolha um modelo…</option>
+      <option value="balconista">Balconista</option>
+      <option value="caixa">Operador de Caixa</option>
+      <option value="assistente_compras">Assistente de Compras</option>
+      <option value="gerente_farmacia">Gerente de Farmácia</option>
+      <option value="gerente_financeiro">Gerente Financeiro</option>
+      <option value="consultor_telefone">Consultor de Vendas (Telefone)</option>
+    </select>
+    <button class="btn" onclick="aplicarModelo()">📄 Aplicar modelo</button>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+    <button class="btn btn--sec" onclick="exportJSON()">⬇️ Exportar JSON</button>
+    <button class="btn btn--sec" onclick="exportCSV()">⬇️ Exportar CSV</button>
+    <button class="btn btn--ghost" onclick="limpar()">🗑️ Limpar</button>
+  </div>
+
+  <!-- Identificação -->
+  <section class="card">
+    <div class="section-title">🧾 Identificação</div>
+    <div class="grid-4">
+      <div class="field"><label>Cargo</label><input name="cargo" placeholder="Ex.: Comprador, Balconista, Gerente…"></div>
+      <div class="field"><label>Área</label><input name="area" placeholder="Ex.: Comercial, Loja, Financeiro"></div>
+      <div class="field"><label>Subordinação direta</label><input name="subordinacao" placeholder="Ex.: Diretoria Comercial"></div>
+      <div class="field"><label>Última revisão</label><input name="revisao" type="date"></div>
+    </div>
+    <p class="note">Dica: defina a revisão anual do RCF junto com a avaliação de desempenho.</p>
+  </section>
+
+  <!-- Missão -->
+  <section class="card">
+    <div class="section-title">🎯 Missão do cargo</div>
+    <div class="area">
+      <label>Descreva o propósito do cargo (o “porquê” e o “o que” precisa entregar):</label>
+      <textarea class="lined" name="missao" placeholder="Ex.: Assegurar o abastecimento de produtos com o melhor custo/benefício, dentro dos padrões de prazo e qualidade, garantindo disponibilidade e margem da loja."></textarea>
+    </div>
+  </section>
+
+  <!-- Indicadores -->
+  <section class="card">
+    <div class="section-title">📊 Indicadores do cargo</div>
+    <div class="table-wrap">
+      <table id="tb-kpi">
+        <thead>
+          <tr>
+            <th style="width:36%">Indicador</th>
+            <th style="width:18%">Meta</th>
+            <th style="width:18%">Periodicidade</th>
+            <th style="width:22%">Como medir</th>
+            <th style="width:6%">—</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-actions">
+      <button class="btn" onclick="addKPI()">➕ Indicador</button>
+      <span class="note">Ex.: Ruptura &lt; 3%, Margem &gt; 28%, NPS &gt; 85, Cobertura 45–60 dias, CMV %.</span>
+    </div>
+  </section>
+
+  <!-- Atividades -->
+  <section class="card">
+    <div class="section-title">🛠️ Atividades desempenhadas</div>
+    <div class="table-wrap">
+      <table id="tb-ativ">
+        <thead>
+          <tr>
+            <th>Atividade</th>
+            <th style="width:26%">Critério de qualidade</th>
+            <th style="width:6%">—</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="table-actions">
+      <button class="btn" onclick="addAtividade()">➕ Atividade</button>
+      <span class="note">Liste atividades de rotina e critérios objetivos (padrão de entrega).</span>
+    </div>
+  </section>
+
+  <!-- Observações -->
+  <section class="card">
+    <div class="section-title">📝 Observações e requisitos</div>
+    <div class="grid-2">
+      <div class="area">
+        <label>Requisitos (formação, cursos, conhecimentos)</label>
+        <textarea class="lined" name="requisitos" placeholder="Ex.: Ensino médio completo; Noções de Excel; Curso de atendimento…"></textarea>
+      </div>
+      <div class="area">
+        <label>Competências comportamentais</label>
+        <textarea class="lined" name="competencias" placeholder="Ex.: Comunicação, Organização, Foco em resultado, Colaboração…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">🔶 DESENVOLVA CONSULTORIA — RCF (Farmácia) • Preencha, aplique o modelo e imprima</div>
+</div>
+
+<script>
+/* ======= Storage key ======= */
+const KEY = 'desenvolva.rcf.v1';
+
+/* ======= Helpers ======= */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const z2 = n => String(n).padStart(2,'0');
+function todayISO(){ const d=new Date(); return `${d.getFullYear()}-${z2(d.getMonth()+1)}-${z2(d.getDate())}`; }
+
+/* ======= Tabelas ======= */
+function addRow(tbody, cells){
+  const tr=document.createElement('tr');
+  cells.forEach(html=>{ const td=document.createElement('td'); td.innerHTML=html; tr.appendChild(td); });
+  // botão excluir
+  const tdDel=document.createElement('td'); tdDel.innerHTML=`<button class="btn btn--ghost" type="button">Excluir</button>`;
+  tdDel.querySelector('button').onclick=()=>{ tr.remove(); saveAll(); };
+  tr.appendChild(tdDel);
+  tbody.appendChild(tr);
+  tr.querySelectorAll('input,textarea').forEach(el=> el.addEventListener('input', saveAll));
+  saveAll();
+}
+function addKPI(preset=[]){
+  const tb = $('#tb-kpi tbody');
+  addRow(tb, [
+    `<input value="${preset[0]||''}" placeholder="Ex.: Ruptura (%) / Margem (%) / Ticket Médio" />`,
+    `<input value="${preset[1]||''}" placeholder="Ex.: &lt; 3% / &gt; 28% / R$ 50" />`,
+    `<input value="${preset[2]||''}" placeholder="Ex.: semanal / mensal" />`,
+    `<input value="${preset[3]||''}" placeholder="Ex.: relatório de vendas / planilha CMV / NPS" />`,
+  ]);
+}
+function addAtividade(preset=[]){
+  const tb = $('#tb-ativ tbody');
+  addRow(tb, [
+    `<textarea rows="2" placeholder="Descreva a atividade">${preset[0]||''}</textarea>`,
+    `<input value="${preset[1]||''}" placeholder="Como saber que foi bem feito?" />`,
+  ]);
+}
+
+/* ======= Modelos ======= */
+const MODELOS = {
+  balconista: {
+    cabecalho:{cargo:'Balconista', area:'Loja/Operações', subordinacao:'Gerente de Farmácia'},
+    missao:'Atender o cliente com acolhimento e segurança, ofertando soluções completas e garantindo a experiência da marca.',
+    kpi:[
+      ['Ticket médio','R$ 50','semanal','Relatório PDV'],
+      ['Conversão de vendas','> 30%','semanal','Relatório abordagem'],
+      ['NPS atendimento','> 85','mensal','Pesquisa cliente'],
+      ['Ruptura em gôndola','< 3%','semanal','Checklist loja'],
+    ],
+    atividades:[
+      ['Abordar o cliente e identificar necessidade (perguntas abertas)','Script de atendimento aplicado'],
+      ['Ofertar agregados e combos conforme campanha','% de agregação atingido'],
+      ['Garantir exposição e precificação corretas','Checklist 100% OK'],
+      ['Abrir/fechar caixa junto ao operador quando necessário','Sem divergências']
+    ],
+    requisitos:'Ensino médio; noções básicas de medicamentos isentos (MIPs); comunicação clara.',
+    competencias:'Acolhimento; escuta ativa; disciplina de execução; trabalho em equipe.'
+  },
+  caixa:{
+    cabecalho:{cargo:'Operador de Caixa', area:'Loja/Operações', subordinacao:'Gerente de Farmácia'},
+    missao:'Garantir experiência ágil e segura no pagamento, evitando filas e divergências.',
+    kpi:[
+      ['Tempo médio de fila','< 5 min','semanal','Amostragem / câmeras'],
+      ['Divergência de caixa','0','diária','Conferência de fechamento'],
+      ['Taxa de cadastro no CRM','> 80%','semanal','Relatório CRM'],
+    ],
+    atividades:[
+      ['Registrar vendas e conferir valores','Sem diferenças no fechamento'],
+      ['Cadastrar cliente e validar dados (CRM)','Taxa mínima 80%'],
+      ['Divulgar campanhas e fidelidade no caixa','Scripts visíveis / relatórios'],
+    ],
+    requisitos:'Ensino médio; noções de PDV/caixa; organização.',
+    competencias:'Agilidade; atenção a detalhes; cordialidade.'
+  },
+  assistente_compras:{
+    cabecalho:{cargo:'Assistente de Compras', area:'Comercial', subordinacao:'Comprador / Diretoria Comercial'},
+    missao:'Dar suporte ao comprador garantindo pedidos corretos, prazos e cadastro sem erros.',
+    kpi:[
+      ['Cobertura de estoque','45–60 dias','mensal','Relatório estoque'],
+      ['Acuracidade de cadastro','> 98%','mensal','Auditoria'],
+      ['Ruptura','< 3%','semanal','Relatório ruptura'],
+    ],
+    atividades:[
+      ['Emitir pedidos e acompanhar entregas','Prazos cumpridos'],
+      ['Atualizar cadastros (NCM, tributos, unidade)','Sem erros de cadastro'],
+      ['Analisar giro e apoiar devoluções','Curva C controlada'],
+    ],
+    requisitos:'Excel básico; noções de tributos e cadastro.',
+    competencias:'Organização; atenção; senso de dono.'
+  },
+  gerente_farmacia:{
+    cabecalho:{cargo:'Gerente de Farmácia', area:'Loja/Operações', subordinacao:'Diretoria / Supervisor Regional'},
+    missao:'Conduzir a loja ao resultado com equipe engajada, padrão de execução e indicadores saudáveis.',
+    kpi:[
+      ['Receita x Meta','>= 100%','semanal','Relatório vendas'],
+      ['Margem bruta','>= 28%','mensal','DRE/PDV'],
+      ['Ruptura','< 3%','semanal','Relatório ruptura'],
+      ['NPS','> 85','mensal','Pesquisa'],
+      ['Rotatividade','< 15% a.a.','mensal','RH'],
+    ],
+    atividades:[
+      ['Planejar escala e liderar briefings diários','Pontualidade e execução'],
+      ['Garantir execução de campanhas e layout','Checklist 100%'],
+      ['Treinar equipe em atendimento e agregação','Plano semestral'],
+      ['Acompanhar indicadores e plano de ação','Reunião semanal'],
+    ],
+    requisitos:'Gestão de varejo; leitura de indicadores; liderança.',
+    competencias:'Comunicação; disciplina; visão de negócio.'
+  },
+  gerente_financeiro:{
+    cabecalho:{cargo:'Gerente Financeiro', area:'ADM/Financeiro', subordinacao:'Diretoria'},
+    missao:'Garantir saúde financeira com fluxo previsível, controles e DRE mensal.',
+    kpi:[
+      ['Fluxo de caixa projetado','Positivo','mensal','Planilha fluxo'],
+      ['Prazo médio pagamento','<= 30 dias','mensal','Relatório financeiro'],
+      ['Fechamento DRE','Até dia 5','mensal','DRE'],
+      ['Despesas fixas / Receita','<= 18%','mensal','DRE'],
+    ],
+    atividades:[
+      ['Controlar contas a pagar/receber e conciliação','Sem atrasos'],
+      ['Fechar DRE e reportar resultados','Prazo cumprido'],
+      ['Gerir orçamento e renegociar despesas','Economias registradas'],
+    ],
+    requisitos:'Excel intermediário; contabilidade gerencial.',
+    competencias:'Rigor; análise crítica; negociação.'
+  },
+  consultor_telefone:{
+    cabecalho:{cargo:'Consultor de Vendas (Telefone)', area:'Loja/Comercial', subordinacao:'Gerente de Farmácia'},
+    missao:'Vender e reativar clientes por telefone/WhatsApp com atendimento consultivo.',
+    kpi:[
+      ['Contatos/dia','>= 60','diária','CRM/planilha'],
+      ['Conversão','>= 20%','semanal','Relatório CRM'],
+      ['Ticket médio','>= R$ 45','semanal','Relatório PDV'],
+      ['Reativação de inativos','>= 10% ao mês','mensal','CRM'],
+    ],
+    atividades:[
+      ['Realizar ligações ativas com script e registro','60 contatos/dia'],
+      ['Ofertar combos e benefícios do programa','Conversão 20%+'],
+      ['Atualizar cadastro e preferências','CRM atualizado'],
+    ],
+    requisitos:'Boa dicção; WhatsApp Business; organização.',
+    competencias:'Empatia; persistência; foco em resultado.'
+  }
+};
+
+/* ======= Aplicar modelo ======= */
+function aplicarModelo(){
+  const key = $('#modelo').value;
+  if(!key || !MODELOS[key]) return alert('Escolha um modelo.');
+  if(!confirm('Aplicar modelo selecionado? (Substitui o que já está na tela)')) return;
+
+  const m = MODELOS[key];
+  // Cabeçalho
+  $('input[name="cargo"]').value        = m.cabecalho.cargo || '';
+  $('input[name="area"]').value         = m.cabecalho.area || '';
+  $('input[name="subordinacao"]').value = m.cabecalho.subordinacao || '';
+  const rev = $('input[name="revisao"]'); if(!rev.value) rev.value = todayISO();
+
+  // Missão
+  $('textarea[name="missao"]').value = m.missao || '';
+
+  // Tabelas
+  $('#tb-kpi tbody').innerHTML = '';
+  (m.kpi||[]).forEach(r=>addKPI(r));
+  if(!(m.kpi||[]).length) addKPI();
+
+  $('#tb-ativ tbody').innerHTML = '';
+  (m.atividades||[]).forEach(r=>addAtividade(r));
+  if(!(m.atividades||[]).length) addAtividade();
+
+  // Campos soltos
+  $('textarea[name="requisitos"]').value   = m.requisitos   || '';
+  $('textarea[name="competencias"]').value = m.competencias || '';
+
+  saveAll();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ======= Persistência ======= */
+function readAll(){
+  const d={};
+  // identificação + grandes áreas
+  d.cab = {
+    cargo:$('input[name="cargo"]').value,
+    area:$('input[name="area"]').value,
+    subordinacao:$('input[name="subordinacao"]').value,
+    revisao:$('input[name="revisao"]').value
+  };
+  d.missao = $('textarea[name="missao"]').value;
+  d.requisitos   = $('textarea[name="requisitos"]').value;
+  d.competencias = $('textarea[name="competencias"]').value;
+
+  d.kpi = Array.from($('#tb-kpi tbody').rows).map(tr =>
+    Array.from(tr.querySelectorAll('input,textarea')).map(i=>i.value)
+  );
+  d.ativ = Array.from($('#tb-ativ tbody').rows).map(tr =>
+    Array.from(tr.querySelectorAll('input,textarea')).map(i=>i.value)
+  );
+  return d;
+}
+function applyAll(d){
+  if(!d) return;
+  $('input[name="cargo"]').value        = d?.cab?.cargo || '';
+  $('input[name="area"]').value         = d?.cab?.area || '';
+  $('input[name="subordinacao"]').value = d?.cab?.subordinacao || '';
+  $('input[name="revisao"]').value      = d?.cab?.revisao || '';
+
+  $('textarea[name="missao"]').value       = d.missao || '';
+  $('textarea[name="requisitos"]').value   = d.requisitos || '';
+  $('textarea[name="competencias"]').value = d.competencias || '';
+
+  $('#tb-kpi tbody').innerHTML=''; (d.kpi||[]).forEach(r=>addKPI(r)); if(!d.kpi?.length) addKPI();
+  $('#tb-ativ tbody').innerHTML='';(d.ativ||[]).forEach(r=>addAtividade(r)); if(!d.ativ?.length) addAtividade();
+}
+function saveAll(){ localStorage.setItem(KEY, JSON.stringify(readAll())); }
+function exportJSON(){ const blob=new Blob([JSON.stringify(readAll(),null,2)],{type:'application/json'}); download(blob,'RCF.json'); }
+function exportCSV(){
+  const d=readAll(), L=[];
+  const esc=v=>String(v??'').replaceAll('"','""');
+  L.push('"Campo","Valor"');
+  L.push(`"Cargo","${esc(d.cab.cargo)}"`);
+  L.push(`"Área","${esc(d.cab.area)}"`);
+  L.push(`"Subordinação","${esc(d.cab.subordinacao)}"`);
+  L.push(`"Revisão","${esc(d.cab.revisao)}"`);
+  L.push(`"Missão","${esc(d.missao)}"`);
+  L.push('');
+  L.push('"Indicador","Meta","Periodicidade","Como medir"');
+  (d.kpi||[]).forEach(r=>L.push(r.map(esc).map(v=>`"${v}"`).join(',')));
+  L.push('');
+  L.push('"Atividade","Critério"');
+  (d.ativ||[]).forEach(r=>L.push(r.map(esc).map(v=>`"${v}"`).join(',')));
+  const blob=new Blob([L.join('\n')],{type:'text/csv;charset=utf-8'}); download(blob,'RCF.csv');
+}
+function download(blob,name){ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; a.click(); URL.revokeObjectURL(url); }
+function limpar(){ if(confirm('Limpar todos os campos?')){ localStorage.removeItem(KEY); location.reload(); } }
+
+/* ======= Init ======= */
+(function init(){
+  // data hoje padrão
+  const rev=$('input[name="revisao"]'); if(!rev.value) rev.value=todayISO();
+  // carregar storage
+  try{ applyAll(JSON.parse(localStorage.getItem(KEY)||'{}')); }catch(e){ /* ignore */ }
+  // garantir uma linha nas tabelas
+  if(!$('#tb-kpi tbody').rows.length) addKPI();
+  if(!$('#tb-ativ tbody').rows.length) addAtividade();
+  // autosave em todos os campos
+  $$('input,textarea').forEach(el=> el.addEventListener('input', saveAll));
+})();
+</script>
+</body>
+</html>
